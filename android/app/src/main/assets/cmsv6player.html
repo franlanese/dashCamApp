@@ -1,0 +1,129 @@
+<!-- == PLAYBACK DE VIDEOS DASHCAM MODELO JC450 PRO ==
+    - Este archivo html llama al script y le pasa las propiedades necesarias tal como indica la documentacion de la dashcam.
+    - El script del reproductor de video proporcionado por los fabricantes no funciona como deberia (cmsv6player.min.js).
+    - Al llamar al reproductor de video el mismo aparentemente buffea el archivo de video pero nunca lo reproduce.
+    - Los links son extraidos del parametro PlaybackUrl de la llamada al api QUERY VIDEO: http://190.64.138.21:8088/StandardApiAction_getVideoFileInfo.action?
+    - Estos links funcionan al ingresarse en el apartado de Playback de una de las paginas proporcionadas por la documentacion: http://190.64.138.21:8088/808gps/open/player/videoExampleH5.html?lang=en.
+    
+
+    == ¿QUE MAS SE INTENTO? == 
+    -- LLAMADA QUERY VIDEO:
+        - DownTaskUrl: La documentacion no es clara. Aparentemente al llamar a este link se pone en cola la descarga del video al almacenamiento de la dashcam
+        - DownUrl
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reproductor CMSv6</title>
+    <script src="http://190.64.138.21:8088/808gps/open/player/swfobject-all.js"></script>
+    <script src="http://190.64.138.21:8088/808gps/open/player/js/cmsv6player.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #cmsv6flash {
+            width: 600px; /* Ajusta esto según tus necesidades */
+            height: 400px; /* Ajusta esto según tus necesidades */
+        }
+    </style>
+</head>
+<body>
+    <div id="cmsv6flash"></div>
+    <script>
+        var swfobject; // Variable global para el reproductor
+        var playingStatusArray = [];
+
+        // Funciones auxiliares (deben ser definidas o reemplazadas según tu implementación)
+        function getValue(id) {
+            // Aquí deberías obtener el valor de los elementos de entrada HTML según su ID.
+            // Ejemplo: return document.getElementById(id).value;
+        }
+
+        function setFocus(id) {
+            // Aquí deberías enfocar el elemento de entrada HTML según su ID.
+            // Ejemplo: document.getElementById(id).focus();
+        }
+
+        function getUrlParameter(name) {
+            // Implementa la lógica para obtener parámetros de la URL, si es necesario.
+            // Ejemplo: return new URLSearchParams(window.location.search).get(name);
+        }
+
+        // Inicializa el reproductor de video
+        function initPlayerExample() {
+            for (var i = 0; i < 101; i++) {
+                playingStatusArray.push(false);
+            }
+
+            // Establece los valores de configuración del reproductor
+            /*
+            var _isVodMode = getValue('vodMode');
+            var width = getValue('playerWidth');
+            var height = getValue('playerHeight');
+            var strLang = getUrlParameter('lang');
+            */
+
+            // Revisa si los valores necesarios están presentes
+            /*
+            if (width === '' || height === '') {
+                // Maneja el caso de valores faltantes
+                return;
+            }
+            */
+
+            // Configura las opciones del reproductor
+            var options = {
+                domId: "cmsv6flash",
+                isVodMode: true,
+                width: 600,
+                height: 400,
+                lang: "en"
+            };
+
+            // Crea el objeto del reproductor
+            swfobject = new Cmsv6Player(options);
+            initFlash();
+        }
+
+        // Ejecuta después de que la inicialización del plugin esté completa
+        function initFlash() {
+            if (typeof swfobject === "undefined" ||
+                typeof swfobject.setWindowNum === "undefined") {
+                setTimeout(initFlash, 50);
+            } else {
+                // Configura el reproductor
+                var language = "js/en.xml";
+                var windowNum = 1;
+                var serverIp = '190.64.138.21';
+                var serverPort = '6604';
+
+                if (language && windowNum && serverIp && serverPort) {
+                    swfobject.setLanguage(language);
+                    swfobject.setWindowNum(parseInt(windowNum, 10));
+                    swfobject.setServerInfo(serverIp, parseInt(serverPort, 10));
+                }
+                startPlayback()
+            }
+        }
+
+        // Funciones para iniciar y detener la reproducción de video
+        function startPlayback() {
+            var videoUrl = "http://190.64.138.21:6604/3/5?DownType=5&jsession=&DevIDNO=23061610000&FILELOC=2&FILESVR=3&FILECHN=0&FILEBEG=46891&FILEEND=46919&PLAYIFRM=0&PLAYFILE=D:/gStorage/STOMEDIA/23061610000/2023-12-14/23061610000-231214-130131-130159-20010100.mp4&PLAYBEG=0&PLAYEND=0&PLAYCHN=0&YEAR=23&MON=12&DAY=14&ttxplayer=1&ttxver=1&rate=1"; // URL del video
+            swfobject.getObjectById("cmsv6flash").startVodM(videoUrl, '');
+        }
+
+        function stopPlayback() {
+            swfobject.getObjectById("cmsv6flash").stopVideo(0);
+        }
+
+        // Inicia la configuración cuando la página se carga
+        window.onload = initPlayerExample;
+    </script>
+</body>
+</html>
